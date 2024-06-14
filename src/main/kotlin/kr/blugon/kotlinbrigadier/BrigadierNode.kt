@@ -14,8 +14,8 @@ interface BrigadierNode {
     fun <T> then(argument: Pair<String, ArgumentType<T>>, node: RequiredBrigadierNode<T>.() -> Unit = {})
     fun require(require: (CommandSourceStack) -> Boolean)
     fun requires(requires: (CommandSourceStack) -> List<Boolean>)
-    fun executes(execute: (CommandContext<CommandSourceStack>) -> Boolean)
-    operator fun String.invoke(node: BrigadierNode.() -> Unit) = then(this, node)
+    fun executes(execute: CommandContext<CommandSourceStack>.() -> Boolean)
+    operator fun String.invoke(node: LiteralBrigadierNode.() -> Unit) = then(this, node)
 }
 
 class LiteralBrigadierNode(val builder: LiteralArgumentBuilder<CommandSourceStack>): BrigadierNode {

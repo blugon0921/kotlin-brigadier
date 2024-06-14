@@ -1,6 +1,6 @@
 # kotlin-brigadier
 
-[![ItemHelper](https://img.shields.io/badge/kotlin_brigadier-1.0.0-blue.svg)]()
+[![ItemHelper](https://img.shields.io/badge/kotlin_brigadier-1.0.1-blue.svg)]()
 <br><br>
 [![Java](https://img.shields.io/badge/Java-21-FF7700.svg?logo=openjdk)]()
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.0-186FCC.svg?logo=kotlin)]()
