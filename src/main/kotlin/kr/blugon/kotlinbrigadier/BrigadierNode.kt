@@ -1,15 +1,19 @@
 package kr.blugon.kotlinbrigadier
 
 import com.mojang.brigadier.arguments.ArgumentType
+import com.mojang.brigadier.arguments.IntegerArgumentType.integer
+import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
+import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.Commands.argument
 
 
 interface BrigadierNode {
+
     fun then(literal: String, node: LiteralBrigadierNode.() -> Unit = {})
     fun <T> then(argument: Pair<String, ArgumentType<T>>, node: RequiredBrigadierNode<T>.() -> Unit = {})
     fun require(require: (CommandSourceStack) -> Boolean)
@@ -74,6 +78,12 @@ class RequiredBrigadierNode <T> (val builder: RequiredArgumentBuilder<CommandSou
                 isRequire = isRequire && it
             }
             isRequire
+        }
+    }
+    fun suggests(suggest: CommandContext<CommandSourceStack>.(SuggestionsBuilder) -> Unit) {
+        builder.suggests { commandContext, suggestionsBuilder ->
+            suggest(commandContext, suggestionsBuilder)
+            suggestionsBuilder.buildFuture()
         }
     }
 
