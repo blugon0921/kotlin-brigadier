@@ -6,8 +6,15 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.plugin.Plugin
 import java.util.*
 
-
+@Deprecated("use registerCommandHandler")
 fun LifecycleEventManager<Plugin>.registerEventHandler(command: BrigadierCommand.() -> Unit) {
+    this.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
+        val registrar = event.registrar()
+        command(BrigadierCommand(registrar))
+    }
+}
+
+fun LifecycleEventManager<Plugin>.registerCommandHandler(command: BrigadierCommand.() -> Unit) {
     this.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
         val registrar = event.registrar()
         command(BrigadierCommand(registrar))

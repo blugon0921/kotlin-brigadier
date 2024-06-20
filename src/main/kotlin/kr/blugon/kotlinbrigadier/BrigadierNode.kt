@@ -1,8 +1,6 @@
 package kr.blugon.kotlinbrigadier
 
 import com.mojang.brigadier.arguments.ArgumentType
-import com.mojang.brigadier.arguments.IntegerArgumentType.integer
-import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
@@ -11,15 +9,15 @@ import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.Commands.argument
 import net.minecraft.commands.SharedSuggestionProvider
+import kotlin.reflect.KProperty
 
 
 interface BrigadierNode {
-
     fun then(literal: String, node: LiteralBrigadierNode.() -> Unit = {})
     fun <T> then(argument: Pair<String, ArgumentType<T>>, node: RequiredBrigadierNode<T>.() -> Unit = {})
     fun require(require: (CommandSourceStack) -> Boolean)
     fun requires(requires: (CommandSourceStack) -> List<Boolean>)
-    fun executes(execute: CommandContext<CommandSourceStack>.() -> Boolean)
+    fun executes(execute: CommandSourceStack.(CommandContext<CommandSourceStack>) -> Boolean)
     operator fun String.invoke(node: LiteralBrigadierNode.() -> Unit) = then(this, node)
 }
 
@@ -49,9 +47,9 @@ class LiteralBrigadierNode(val builder: LiteralArgumentBuilder<CommandSourceStac
         }
     }
 
-    override fun executes(execute: CommandContext<CommandSourceStack>.() -> Boolean) {
+    override fun executes(execute: CommandSourceStack.(CommandContext<CommandSourceStack>) -> Boolean) {
         builder.executes { c->
-            val response = execute(c)
+            val response = execute(c.source, c)
             if(response) 1
             else 0
         }
@@ -81,7 +79,7 @@ class RequiredBrigadierNode <T> (val builder: RequiredArgumentBuilder<CommandSou
             isRequire
         }
     }
-    fun suggest(isSharedSuggestion: Boolean = true, suggest: CommandContext<CommandSourceStack>.() -> List<String>) {
+    fun suggests(isSharedSuggestion: Boolean = true, suggest: CommandContext<CommandSourceStack>.() -> List<String>) {
         builder.suggests { context, suggestionsBuilder ->
             if(isSharedSuggestion) SharedSuggestionProvider.suggest(suggest(context), suggestionsBuilder)
             else {
@@ -92,8 +90,8 @@ class RequiredBrigadierNode <T> (val builder: RequiredArgumentBuilder<CommandSou
             }
         }
     }
-    fun suggest(suggestions: List<String>, isSharedSuggestion: Boolean = true) {
-        suggest(isSharedSuggestion) {
+    fun suggests(suggestions: List<String>, isSharedSuggestion: Boolean = true) {
+        suggests(isSharedSuggestion) {
             suggestions
         }
     }
@@ -104,11 +102,19 @@ class RequiredBrigadierNode <T> (val builder: RequiredArgumentBuilder<CommandSou
         }
     }
 
-    override fun executes(execute: CommandContext<CommandSourceStack>.() -> Boolean) {
+    override fun executes(execute: CommandSourceStack.(CommandContext<CommandSourceStack>) -> Boolean) {
         builder.executes { c->
-            val response = execute(c)
+            val response = execute(c.source, c)
             if(response) 1
             else 0
         }
     }
+}
+
+inline operator fun <reified T> CommandContext<CommandSourceStack>.get(name: String): T {
+    return this.getArgument(name, T::class.java)
+}
+
+inline operator fun <reified T> CommandContext<CommandSourceStack>.getValue(thisRef: Any?, property: KProperty<*>): T {
+    return this.getArgument(property.name, T::class.java)
 }
