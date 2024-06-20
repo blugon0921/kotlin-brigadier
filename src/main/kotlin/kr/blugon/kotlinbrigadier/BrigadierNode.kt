@@ -10,6 +10,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.Commands.argument
+import net.minecraft.commands.SharedSuggestionProvider
 
 
 interface BrigadierNode {
@@ -78,6 +79,22 @@ class RequiredBrigadierNode <T> (val builder: RequiredArgumentBuilder<CommandSou
                 isRequire = isRequire && it
             }
             isRequire
+        }
+    }
+    fun suggest(isSharedSuggestion: Boolean = true, suggest: CommandContext<CommandSourceStack>.() -> List<String>) {
+        builder.suggests { context, suggestionsBuilder ->
+            if(isSharedSuggestion) SharedSuggestionProvider.suggest(suggest(context), suggestionsBuilder)
+            else {
+                suggest(context).forEach { suggestion->
+                    suggestionsBuilder.suggest(suggestion)
+                }
+                suggestionsBuilder.buildFuture()
+            }
+        }
+    }
+    fun suggest(suggestions: List<String>, isSharedSuggestion: Boolean = true) {
+        suggest(isSharedSuggestion) {
+            suggestions
         }
     }
     fun suggests(suggest: CommandContext<CommandSourceStack>.(SuggestionsBuilder) -> Unit) {

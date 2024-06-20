@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     kotlin("jvm") version "2.0.0"
     id("org.jetbrains.dokka") version "1.5.0"
+    id("io.papermc.paperweight.userdev") version "1.7.1"
     `maven-publish`
 }
 
@@ -19,12 +20,13 @@ val mcVersion = "1.21"
 
 repositories {
     mavenCentral()
-    maven("https://papermc.io/repo/repository/maven-public/")
 }
 
 dependencies {
     compileOnly(kotlin("stdlib"))
-    compileOnly("io.papermc.paper:paper-api:${mcVersion}-R0.1-SNAPSHOT")
+    compileOnly(kotlin("reflect"))
+    paperweight.paperDevBundle("${mcVersion}-R0.1-SNAPSHOT")
+//    compileOnly("io.papermc.paper:paper-api:${mcVersion}-R0.1-SNAPSHOT")
 }
 
 tasks {
