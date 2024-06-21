@@ -79,11 +79,11 @@ class RequiredBrigadierNode <T> (val builder: RequiredArgumentBuilder<CommandSou
             isRequire
         }
     }
-    fun suggests(isSharedSuggestion: Boolean = true, suggest: CommandContext<CommandSourceStack>.() -> List<String>) {
+    fun suggests(isSharedSuggestion: Boolean = true, suggest: CommandSourceStack.(CommandContext<CommandSourceStack>) -> List<String>) {
         builder.suggests { context, suggestionsBuilder ->
-            if(isSharedSuggestion) SharedSuggestionProvider.suggest(suggest(context), suggestionsBuilder)
+            if(isSharedSuggestion) SharedSuggestionProvider.suggest(suggest(context.source, context), suggestionsBuilder)
             else {
-                suggest(context).forEach { suggestion->
+                suggest(context.source, context).forEach { suggestion->
                     suggestionsBuilder.suggest(suggestion)
                 }
                 suggestionsBuilder.buildFuture()
@@ -95,9 +95,9 @@ class RequiredBrigadierNode <T> (val builder: RequiredArgumentBuilder<CommandSou
             suggestions
         }
     }
-    fun suggests(suggest: CommandContext<CommandSourceStack>.(SuggestionsBuilder) -> Unit) {
+    fun suggestsWithBuilder(suggest: CommandSourceStack.(CommandContext<CommandSourceStack>, SuggestionsBuilder) -> Unit) {
         builder.suggests { commandContext, suggestionsBuilder ->
-            suggest(commandContext, suggestionsBuilder)
+            suggest(commandContext.source, commandContext, suggestionsBuilder)
             suggestionsBuilder.buildFuture()
         }
     }
