@@ -17,7 +17,7 @@ interface BrigadierNode {
     fun <T> then(argument: Pair<String, ArgumentType<T>>, node: RequiredBrigadierNode<T>.() -> Unit = {})
     fun require(require: (CommandSourceStack) -> Boolean)
     fun requires(requires: (CommandSourceStack) -> List<Boolean>)
-    fun executes(execute: CommandSourceStack.(CommandContext<CommandSourceStack>) -> Boolean)
+    fun executes(execute: CommandSourceStack.(CommandContext<CommandSourceStack>) -> Unit)
     operator fun String.invoke(node: LiteralBrigadierNode.() -> Unit) = then(this, node)
 }
 
@@ -47,11 +47,10 @@ class LiteralBrigadierNode(val builder: LiteralArgumentBuilder<CommandSourceStac
         }
     }
 
-    override fun executes(execute: CommandSourceStack.(CommandContext<CommandSourceStack>) -> Boolean) {
+    override fun executes(execute: CommandSourceStack.(CommandContext<CommandSourceStack>) -> Unit) {
         builder.executes { c->
-            val response = execute(c.source, c)
-            if(response) 1
-            else 0
+            execute(c.source, c)
+            return@executes 1
         }
     }
 }
@@ -102,11 +101,10 @@ class RequiredBrigadierNode <T> (val builder: RequiredArgumentBuilder<CommandSou
         }
     }
 
-    override fun executes(execute: CommandSourceStack.(CommandContext<CommandSourceStack>) -> Boolean) {
+    override fun executes(execute: CommandSourceStack.(CommandContext<CommandSourceStack>) -> Unit) {
         builder.executes { c->
-            val response = execute(c.source, c)
-            if(response) 1
-            else 0
+            execute(c.source, c)
+            return@executes 1
         }
     }
 }

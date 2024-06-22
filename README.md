@@ -1,6 +1,6 @@
 # kotlin-brigadier
 
-[![ItemHelper](https://img.shields.io/badge/kotlin_brigadier-1.1.1-blue.svg)]()
+[![ItemHelper](https://img.shields.io/badge/kotlin_brigadier-1.1.2-blue.svg)]()
 <br><br>
 [![Java](https://img.shields.io/badge/Java-21-FF7700.svg?logo=openjdk)]()
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.0-186FCC.svg?logo=kotlin)]()
@@ -15,20 +15,19 @@
 ```kotlin
 val manager = plugin.lifecycleManager
 manager.registerEventHandler {
-    register("test", "description", "alias1", "alias2") {
+    register("command", "description", "alias1", "alias2") {
         then("option1") {
             require { player.isOp }
             
             then("world" to world()) {
                 executes {
-                    player.sendMessage(getArgument("world", World::class.java).name)
-                    true
+                    val world: World by it
+                    player.sendMessage(world)
                 }
             }
             
             executes {
                 player.sendMessage("you is op")
-                true
             }
         }
         "option2" {
@@ -38,13 +37,17 @@ manager.registerEventHandler {
             )}
             executes {
                 player.sendMessage("option2")
-                true
+            }
+        }
+        then("option3" to string()) {
+            executes {
+                val option3: String by it
+                player.sendMessage(option3)
             }
         }
         
         executes {
             player.sendMessage("test command")
-            true
         }
     }
 }
